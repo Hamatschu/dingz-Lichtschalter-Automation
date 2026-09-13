@@ -1,0 +1,86 @@
+alias: Lichtschalter Büro
+description: Steuerung über Taster 1 (100% / Hochdimmen) und Taster 3 (10% / Runterdimmen)
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.buro_lichtschalter_buro_taste_1
+    to:
+      - m1
+    id: taste_1_klick
+  - trigger: state
+    entity_id:
+      - sensor.buro_lichtschalter_buro_taste_1
+    to:
+      - h
+    id: taste_1_halten
+  - trigger: state
+    entity_id:
+      - sensor.buro_lichtschalter_buro_taste_3
+    to:
+      - m1
+    id: taste_3_klick
+  - trigger: state
+    entity_id:
+      - sensor.buro_lichtschalter_buro_taste_3
+    to:
+      - h
+    id: taste_3_halten
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: taste_1_klick
+        sequence:
+          - action: light.toggle
+            target:
+              device_id: cc4236db62687a7d641f0b3213d3a647
+            data:
+              brightness_pct: 100
+              transition: 1
+      - conditions:
+          - condition: trigger
+            id: taste_1_halten
+        sequence:
+          - repeat:
+              while:
+                - condition: state
+                  entity_id: sensor.buro_lichtschalter_buro_taste_1
+                  state: h
+              sequence:
+                - action: light.turn_on
+                  target:
+                    device_id: cc4236db62687a7d641f0b3213d3a647
+                  data:
+                    brightness_step_pct: 8
+                    transition: 0.2
+                - delay:
+                    milliseconds: 200
+      - conditions:
+          - condition: trigger
+            id: taste_3_klick
+        sequence:
+          - action: light.toggle
+            target:
+              device_id: cc4236db62687a7d641f0b3213d3a647
+            data:
+              brightness_pct: 10
+      - conditions:
+          - condition: trigger
+            id: taste_3_halten
+        sequence:
+          - repeat:
+              while:
+                - condition: state
+                  entity_id: sensor.buro_lichtschalter_buro_taste_3
+                  state: h
+              sequence:
+                - action: light.turn_on
+                  target:
+                    device_id: cc4236db62687a7d641f0b3213d3a647
+                  data:
+                    brightness_step_pct: -8
+                    transition: 0.2
+                - delay:
+                    milliseconds: 200
+mode: restart
